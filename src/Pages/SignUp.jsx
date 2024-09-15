@@ -45,13 +45,13 @@ const SignUp = () => {
       setEmailError("Invalid Email");
     }
     if (!name) {
-      setNameError("Email is required");
+      setNameError("Name is required");
     }
     if (!phone) {
-      setPhoneError("Email is required");
+      setPhoneError("Phone Number is required");
     }
     if (!password) {
-      setPasswordError("Email is required");
+      setPasswordError("Password is required");
     }
   };
 
