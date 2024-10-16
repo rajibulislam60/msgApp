@@ -2,9 +2,13 @@ import React, { useState } from "react";
 import SignUpImage from "../assets/animeGirls.webp";
 import Button from "../components/Button";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 const SignUp = () => {
+  const auth = getAuth();
+  const navigate = useNavigate();
+
   let [showPassword, setShowPassword] = useState(false);
 
   let [email, setEmail] = useState("");
@@ -41,7 +45,7 @@ const SignUp = () => {
   let handleSubmit = () => {
     if (!email) {
       setEmailError("Email is required");
-    }else if(!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)){
+    } else if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
       setEmailError("Invalid Email");
     }
     if (!name) {
@@ -52,6 +56,27 @@ const SignUp = () => {
     }
     if (!password) {
       setPasswordError("Password is required");
+    }
+    if (email && name && phone && password) {
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+
+          setEmail("");
+          setName("");
+          setPhone("");
+          setPassword("");
+
+          navigate("/login");
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          if (errorCode === "auth/email-already-in-use") {
+            setEmailError("Email is already in use");
+          } else {
+            alert(`An error occurred: ${error.message}`);
+          }
+        });
     }
   };
 
@@ -123,7 +148,9 @@ const SignUp = () => {
               value={password}
             />
             {passwordError && (
-              <p className="text-red-500 text-sm font-normal">{passwordError}</p>
+              <p className="text-red-500 text-sm font-normal">
+                {passwordError}
+              </p>
             )}
 
             <div onClick={handleVisiable} className="cursor-pointer">

@@ -3,9 +3,13 @@ import SignInImage from "../assets/girlsAnime.jpg";
 import GoogleImg from "../assets/googleImg.png";
 import Button from "../components/Button";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 const SignIn = () => {
+  const auth = getAuth();
+  const navigate = useNavigate();
+
   let [showPassword, setShowPassword] = useState(false);
 
   let [email, setEmail] = useState("");
@@ -33,6 +37,23 @@ const SignIn = () => {
     }
     if (!password) {
       setPasswordError("Password is required");
+    }
+    if (email && password) {
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+
+          setEmail("");
+          setPassword("");
+
+          navigate("/");
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          if (error.code.includes("auth/invalid-credential")) {
+            alert("Invalid-credential");
+          }
+        });
     }
   };
   return (
@@ -96,7 +117,7 @@ const SignIn = () => {
             </div>
           </div>
           {/* ----------------button area----------------------- */}
-          <div className="w-[368px] h-[80px] mt-[61px]">
+          <div className="w-[368px] h-[80px] mt-[61px] cursor-pointer">
             <Button onClick={handleSubmit} name="Login" />
           </div>
           <p className="text-sm text-secondary text-center w-[368px] mt-[14px]">
