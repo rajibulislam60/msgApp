@@ -3,11 +3,14 @@ import SignUpImage from "../assets/animeGirls.webp";
 import Button from "../components/Button";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { getDatabase, ref, set } from "firebase/database";
 
 const SignUp = () => {
   const auth = getAuth();
   const navigate = useNavigate();
+
+  const db = getDatabase();
 
   let [showPassword, setShowPassword] = useState(false);
 
@@ -61,11 +64,14 @@ const SignUp = () => {
       createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           const user = userCredential.user;
-
-          setEmail("");
-          setName("");
-          setPhone("");
-          setPassword("");
+          sendEmailVerification(auth.currentUser).then(()=>{
+            set(ref(db, "users/" + user.uid), {
+              username: name,
+              email: email,
+              phone: phone,
+            });
+          })
+  
 
           navigate("/login");
         })
